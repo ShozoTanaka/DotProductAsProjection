@@ -15,7 +15,7 @@
 GraphScene::GraphScene(Game* game)
 	:
 	m_game(game),									// Gameクラス
-	m_graphics(nullptr),				// DirectXGraphicsクラス
+	m_graphics(nullptr),							// DirectXGraphicsクラス
 	m_device(nullptr),								// Deviceクラス
 	m_context(nullptr),								// DeviceContextクラス
 	m_keyboardState{},								// キーボードステート
@@ -161,16 +161,27 @@ void GraphScene::DrawInfo()
 	// カメラ位置を書式化する
 	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Camera position: (%6.1f, %6.1f, %6.1f)",
 		m_cameraPosition.x, m_cameraPosition.y, m_cameraPosition.z);
+	// カメラ位置を書式化した文字列と表示する座標を追加する
 	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 0.0f));
 	// カメラ回転角を書式化する
 	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Camera rotation: (%6.1f, %6.1f, %6.1f), %6.1f)",
 		m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z, m_cameraRotation.w);
+	// カメラ回転角を書式化した文字列と表示する座標を追加する
 	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 28.0f));
-
-	// 内積/外積を書式化する
-	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Projection: (%6.1f, %6.1f)", m_projection.x, m_projection.y);
-	// 内積外積書式化した文字列と表示する座標を追加する
+	// ベクトルAの位置を書式化する
+	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Vector A position: (%6.1f, %6.1f)",
+		m_vectorA.x, m_vectorA.y);
+	// ベクトルAを書式化した文字列と表示する座標を追加する
 	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 56.0f));
+	// ベクトルBの位置を書式化する
+	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Vector B position: (%6.1f, %6.1f)",
+		m_vectorB.x, m_vectorB.y);
+	// ベクトルBを書式化した文字列と表示する座標を追加する
+	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 84.0f));
+	// 正射影ベクトルを書式化する
+	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Projection: (%6.1f, %6.1f)", m_projection.x, m_projection.y);
+	// 正射影ベクトルを書式化した文字列と表示する座標を追加する
+	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 112.0f));
 	// すべての情報を描画する
 	spriteString2D.Render();
 }
