@@ -35,10 +35,10 @@ GraphScene::GraphScene(Game* game)
 	m_nearPlane(0.1f),								// ニアクリップ
 	m_farPlane(0.0f),								// ファークリップ
 	m_scale(1.0f),										// スケール
-	m_angleA(0.0f),
-	m_angleB(0.0f),
-	m_vectorA(DirectX::SimpleMath::Vector2::Zero),
-	m_vectorB(DirectX::SimpleMath::Vector2::Zero),
+	m_angleV1(0.0f),
+	m_angleV2(0.0f),
+	m_vectorV1(DirectX::SimpleMath::Vector2::Zero),
+	m_vectorV2(DirectX::SimpleMath::Vector2::Zero),
 	m_projection(0.0f)
 {
 	// DirectX Graphicsクラスのインスタンスを取得する
@@ -72,37 +72,36 @@ void GraphScene::Update(const DX::StepTimer& timer)
 	// マウストラッカーを更新する
 	m_mouseStateTracker.Update(m_mouseState);
 
-	// 左右キーでベクトルAの方向を変える
+	// 左右キーでベクトルv1の方向を変える
 	if (m_keyboardState.Left)
-		m_angleA -= 1.0f;
+		m_angleV1 -= 1.0f;
 	if (m_keyboardState.Right)
-		m_angleA += 1.0f;
-	// 上下キーでベクトルBの方向を変える
+		m_angleV1 += 1.0f;
+	// 上下キーでベクトルv2の方向を変える
 	if (m_keyboardState.Up)
-		m_angleB -= 1.0f;
+		m_angleV2 -= 1.0f;
 	if (m_keyboardState.Down)
-		m_angleB += 1.0f;
+		m_angleV2 += 1.0f;
 
 	// 向きを設定する
-	DirectX::SimpleMath::Vector2 directionA(1.414f, 0.0f);
+	DirectX::SimpleMath::Vector2 directionV1(1.414f, 0.0f);
 	// 回転行列を生成する
-	DirectX::SimpleMath::Matrix rotationA = DirectX::SimpleMath::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_angleA));
-	// ベクトルAに方向と大きさ(50)を設定する
-	m_vectorA = DirectX::SimpleMath::Vector2::Transform(directionA, rotationA) * 50.0f;
-	// ベクトルAを複製する
-	DirectX::SimpleMath::Vector2 normalizeA = m_vectorA;
-	// ベクトルAを正規化する
-	normalizeA.Normalize();
+	DirectX::SimpleMath::Matrix rotationV1 = DirectX::SimpleMath::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_angleV1));
+	// ベクトルv1に方向と大きさ(50)を設定する
+	m_vectorV1 = DirectX::SimpleMath::Vector2::Transform(directionV1, rotationV1) * 50.0f;
+	// ベクトルv1を複製する
+	DirectX::SimpleMath::Vector2 normalizeV1 = m_vectorV1;
+	// ベクトルv1を正規化する
+	normalizeV1.Normalize();
 
 	// 向きを設定する
-	DirectX::SimpleMath::Vector2 directionB(1.0f, -1.0f);
+	DirectX::SimpleMath::Vector2 directionV2(1.0f, -1.0f);
 	// 回転行列を生成する
-	DirectX::SimpleMath::Matrix rotationB = DirectX::SimpleMath::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_angleB));
-	// ベクトルBに方向と大きさ(50)を設定する
-	m_vectorB = DirectX::SimpleMath::Vector2::Transform(directionB, rotationB) * 50.0f;
+	DirectX::SimpleMath::Matrix rotationV2 = DirectX::SimpleMath::Matrix::CreateRotationZ(DirectX::XMConvertToRadians(m_angleV2));
+	// ベクトルv2に方向と大きさ(50)を設定する
+	m_vectorV2 = DirectX::SimpleMath::Vector2::Transform(directionV2, rotationV2) * 50.0f;
 	// 正射影を行う
-	//m_projection = normalizeA.Dot(m_vectorB)  * normalizeA;
-	m_projection = m_vectorB.Dot(normalizeA) * normalizeA;
+	m_projection = m_vectorV2.Dot(normalizeV1) * normalizeV1;
 	// 視点ベクトルを取得する
 	auto eyePosition = m_game->GetCamera()->GetEyePosition();
 	// 視点と注視点の距離を計算する
@@ -127,18 +126,18 @@ void GraphScene::Render()
 	// プリミティブ描画を開始する
 	m_graphics->DrawPrimitiveBegin(m_graphics->GetViewMatrix(), m_graphics->GetProjectionMatrix());
 
-	// ベクトルAを描画する
-	m_graphics->DrawVector(DirectX::SimpleMath::Vector2(0.0f, 0.0f), m_vectorA, DirectX::Colors::White);
+	// ベクトルv1を描画する
+	m_graphics->DrawVector(DirectX::SimpleMath::Vector2(0.0f, 0.0f), m_vectorV1, DirectX::Colors::White);
 	// 白色の円を描画する
-	m_graphics->DrawCircle(m_vectorA, 3.0f, DirectX::Colors::White);
-	// ベクトルBを描画する
-	m_graphics->DrawVector(DirectX::SimpleMath::Vector2(0.0f, 0.0f), m_vectorB, DirectX::Colors::Blue);
+	m_graphics->DrawCircle(m_vectorV1, 3.0f, DirectX::Colors::White);
+	// ベクトルv2を描画する
+	m_graphics->DrawVector(DirectX::SimpleMath::Vector2(0.0f, 0.0f), m_vectorV2, DirectX::Colors::Blue);
 	// 青色の円を描画する
-	m_graphics->DrawCircle(m_vectorB, 3.0f, DirectX::Colors::Blue);
+	m_graphics->DrawCircle(m_vectorV2, 3.0f, DirectX::Colors::Blue);
 	// 正射影ベクトルを描画する
 	m_graphics->DrawVector(DirectX::SimpleMath::Vector2(0.0f, 0.0f), m_projection, DirectX::Colors::Red);
 	// ベクトルCを描画する
-	m_graphics->DrawVector(m_vectorB, m_projection - m_vectorB, DirectX::Colors::Yellow);
+	m_graphics->DrawVector(m_vectorV2, m_projection - m_vectorV2, DirectX::Colors::Yellow);
 
 	// プリミティブ描画を終了する
 	m_graphics->DrawPrimitiveEnd();
@@ -168,15 +167,15 @@ void GraphScene::DrawInfo()
 		m_cameraRotation.x, m_cameraRotation.y, m_cameraRotation.z, m_cameraRotation.w);
 	// カメラ回転角を書式化した文字列と表示する座標を追加する
 	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 28.0f));
-	// ベクトルAの位置を書式化する
-	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Vector A position: (%6.1f, %6.1f)",
-		m_vectorA.x, m_vectorA.y);
-	// ベクトルAを書式化した文字列と表示する座標を追加する
+	// ベクトルv1の位置を書式化する
+	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Vector v1 position: (%6.1f, %6.1f)",
+		m_vectorV1.x, m_vectorV1.y);
+	// ベクトルv1を書式化した文字列と表示する座標を追加する
 	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 56.0f));
-	// ベクトルBの位置を書式化する
-	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Vector B position: (%6.1f, %6.1f)",
-		m_vectorB.x, m_vectorB.y);
-	// ベクトルBを書式化した文字列と表示する座標を追加する
+	// ベクトルv2の位置を書式化する
+	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Vector v2 position: (%6.1f, %6.1f)",
+		m_vectorV2.x, m_vectorV2.y);
+	// ベクトルv2を書式化した文字列と表示する座標を追加する
 	spriteString2D.AddString(stringBuffer, DirectX::SimpleMath::Vector2(0.0f, 84.0f));
 	// 正射影ベクトルを書式化する
 	swprintf(stringBuffer, sizeof(stringBuffer) / sizeof(wchar_t), L"Projection: (%6.1f, %6.1f)", m_projection.x, m_projection.y);
